@@ -40,6 +40,7 @@ DISTFILES += \
     LICENSE
 
 SOURCES +=  \
+    data_structures/directed_acyclic_graph.cpp \
     data_structures/node.cpp \
     data_structures/segment_intersection_checker.cpp \
     data_structures/trapezoid.cpp \
@@ -53,6 +54,7 @@ FORMS += \
     managers/trapezoidalmapmanager.ui
 
 HEADERS += \
+    data_structures/directed_acyclic_graph.h \
     data_structures/node.h \
     data_structures/segment_intersection_checker.h \
     data_structures/trapezoid.h \
