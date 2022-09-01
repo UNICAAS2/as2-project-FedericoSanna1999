@@ -12,6 +12,9 @@
 
 #include "drawables/drawable_trapezoidalmap_dataset.h"
 
+#include "drawables/drawable_trapezoidalmap.h"
+#include "data_structures/directed_acyclic_graph.h"
+
 namespace Ui {
     class TrapezoidalMapManager;
 }
@@ -57,8 +60,8 @@ private:
     //---------------------------------------------------------------------
     //Declare your attributes here
 
-
-
+    DrawableTrapezoidalMap drawableTrapezoidalMap;
+    DirectedAcyclicGraph directedAcyclicGraph;
 
     //#####################################################################
 
