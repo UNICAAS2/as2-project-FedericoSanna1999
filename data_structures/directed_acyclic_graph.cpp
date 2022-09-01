@@ -45,6 +45,6 @@ void DirectedAcyclicGraph::clear() {
  * @brief DirectedAcyclicGraph::initialize allows to create the default trapezoid node which represents the bounding box trapezoid.
  */
 void DirectedAcyclicGraph::initialize() {
-    Node boundingBoxNode(Node::TRAPEZOID, 0);
+    const Node boundingBoxNode(Node::TRAPEZOID, 0);
     nodes.push_back(boundingBoxNode);
 }
