@@ -11,6 +11,8 @@
 
 #include "utils/fileutils.h"
 
+#include "algorithms/algorithms.h"
+
 //Limits for the bounding box
 //It defines where points can be added
 //Do not change the following line
@@ -193,8 +195,7 @@ void TrapezoidalMapManager::addSegmentToTrapezoidalMap(const cg3::Segment2d& seg
     //it more efficient in memory. However, depending on how you implement your algorithms and data 
     //structures, you could save directly the point (Point2d) in each trapezoid (it is fine).
 
-
-
+    drawableTrapezoidalMap.highlight(std::numeric_limits<size_t>::max());
 
     //#####################################################################
 
@@ -237,8 +238,7 @@ void TrapezoidalMapManager::queryTrapezoidalMap(const cg3::Point2d& queryPoint)
     //TrapezoidalMap and DAG are two separate general purpose data structures that an algorithm uses.
     //THINK ABOUT YOUR STRUCTURE BEFORE WRITING CODE!
 
-
-
+    const size_t& lastTrapezoidFound = algorithms::query(drawableTrapezoidalMap, directedAcyclicGraph, queryPoint);
 
     //#####################################################################
 
@@ -249,9 +249,7 @@ void TrapezoidalMapManager::queryTrapezoidalMap(const cg3::Point2d& queryPoint)
     //the output trapezoid in the canvas (DrawableTrapezoidMap should implement the method
     //to do that).
 
-
-
-
+    drawableTrapezoidalMap.highlight(lastTrapezoidFound);
 
     //#####################################################################
 
@@ -259,7 +257,7 @@ void TrapezoidalMapManager::queryTrapezoidalMap(const cg3::Point2d& queryPoint)
 
     //You can delete this line after you implement the algorithm: it is
     //just needed to suppress the unused-variable warning
-    CG3_SUPPRESS_WARNING(queryPoint);
+    // CG3_SUPPRESS_WARNING(queryPoint);
 }
 
 /**
