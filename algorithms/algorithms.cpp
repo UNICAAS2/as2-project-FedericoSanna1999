@@ -4,6 +4,22 @@
 #include "utils/geometric_utils.h"
 
 /**
+ * @brief algorithms::add allows updating the data structures with the new segment.
+ * @param trapezoidalMap contains all points, segments, and trapezoids.
+ * @param directedAcyclicGraph contains all point, segment, and trapezoid nodes.
+ * @param segment is the segment added to the data structures.
+ */
+void algorithms::add(TrapezoidalMap& trapezoidalMap, DirectedAcyclicGraph& directedAcyclicGraph, const cg3::Segment2d& segment) {
+    std::vector<size_t> intersectedTrapezoids;
+
+    const size_t& id = trapezoidalMap.addSegment(segment);
+
+    followSegment(trapezoidalMap, directedAcyclicGraph, trapezoidalMap.getSegment(id), intersectedTrapezoids);
+
+    // TODO: update data structures
+}
+
+/**
  * @brief algorithms::query returns the trapezoid index where the query point is in, using the directed acyclig graph and the trapezoidal map.
  * @param trapezoidalMap contains all points, segments, and trapezoids.
  * @param directedAcyclicGraph contains all point, segment, and trapezoid nodes.

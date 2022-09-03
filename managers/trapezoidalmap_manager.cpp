@@ -196,6 +196,7 @@ void TrapezoidalMapManager::addSegmentToTrapezoidalMap(const cg3::Segment2d& seg
     //structures, you could save directly the point (Point2d) in each trapezoid (it is fine).
 
     drawableTrapezoidalMap.highlight(std::numeric_limits<size_t>::max());
+    algorithms::add(drawableTrapezoidalMap, directedAcyclicGraph, segment);
 
     //#####################################################################
 
@@ -203,7 +204,7 @@ void TrapezoidalMapManager::addSegmentToTrapezoidalMap(const cg3::Segment2d& seg
 
     //You can delete this line after you implement the algorithm: it is
     //just needed to suppress the unused-variable warning
-    CG3_SUPPRESS_WARNING(segment);
+    // CG3_SUPPRESS_WARNING(segment);
 }
 
 /**
