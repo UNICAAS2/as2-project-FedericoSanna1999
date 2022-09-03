@@ -64,3 +64,34 @@ size_t algorithms::find(const TrapezoidalMap& trapezoidalMap, const DirectedAcyc
 
     return nodes[id].getObject();
 }
+
+/**
+ * @brief algorithms::followSegment allows to find the trapezoids which are intersected by the segment.
+ * @param trapezoidalMap contains all points, segments, and trapezoids.
+ * @param directedAcyclicGraph contains all point, segment, and trapezoid nodes.
+ * @param segment is the segment used to find the trapezoids which are intersected by it.
+ * @param intersectedTrapezoids is the vector which contains the trapezoids which are intersected by the segment.
+ */
+void algorithms::followSegment(const TrapezoidalMap& trapezoidalMap, const DirectedAcyclicGraph& directedAcyclicGraph, const cg3::Segment2d& segment, std::vector<size_t>& intersectedTrapezoids) {
+    const std::vector<cg3::Point2d>& points = trapezoidalMap.getPoints();
+    const std::vector<Trapezoid>& trapezoids = trapezoidalMap.getTrapezoids();
+    bool follow = true;
+
+    size_t id = find(trapezoidalMap, directedAcyclicGraph, segment);
+
+    while (follow) {
+        intersectedTrapezoids.push_back(id);
+
+        if (segment.p2().x() <= points[trapezoids[id].getRightPoint()].x())
+            follow = false;
+        else {
+            if (cg3::isPointAtLeft(segment, points[trapezoids[id].getRightPoint()]))
+                id = trapezoids[id].getLowerRightNeighbour();
+            else
+                id = trapezoids[id].getUpperRightNeighbour();
+
+            if (id == std::numeric_limits<size_t>::max())
+                follow = false;
+        }
+    }
+}
