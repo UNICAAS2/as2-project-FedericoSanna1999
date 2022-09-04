@@ -197,6 +197,7 @@ void TrapezoidalMapManager::addSegmentToTrapezoidalMap(const cg3::Segment2d& seg
 
     drawableTrapezoidalMap.highlight(std::numeric_limits<size_t>::max());
     algorithms::add(drawableTrapezoidalMap, directedAcyclicGraph, segment);
+    drawableTrapezoidalMap.addTrapezoidColors();
 
     //#####################################################################
 

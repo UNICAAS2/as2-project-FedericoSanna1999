@@ -10,6 +10,7 @@
  */
 DrawableTrapezoidalMap::DrawableTrapezoidalMap(const cg3::Point2d& boundingBoxMin, const cg3::Point2d& boundingBoxMax) :
     TrapezoidalMap(boundingBoxMin, boundingBoxMax) {
+    std::srand(time(nullptr));
     initialize();
 }
 
@@ -84,7 +85,16 @@ void DrawableTrapezoidalMap::highlight(const size_t& lastTrapezoidFound) {
  * @brief DrawableTrapezoidalMap::addTrapezoidColors allows adding new random colors in the vector "trapezoidColors" for the new trapezoids after a new segment insertion.
  */
 void DrawableTrapezoidalMap::addTrapezoidColors() {
-    // TODO
+    const size_t& trapezoidNumber = getTrapezoids().size();
+    cg3::Color trapezoidColor;
+
+    while (trapezoidColors.size() < trapezoidNumber) {
+        do {
+            trapezoidColor = cg3::Color(std::rand() % 256, std::rand() % 256, std::rand() % 256);
+        } while (trapezoidColor == highlightColor);
+
+        trapezoidColors.push_back(trapezoidColor);
+    }
 }
 
 /**
