@@ -1,6 +1,7 @@
 #include "drawable_trapezoidalmap.h"
 
 #include <cg3/viewer/opengl_objects/opengl_objects2.h>
+#include "utils/geometric_utils.h"
 
 /**
  * @brief DrawableTrapezoidalMap::DrawableTrapezoidalMap is the constructor of the class which initializes the trapezoidal map.
@@ -16,7 +17,43 @@ DrawableTrapezoidalMap::DrawableTrapezoidalMap(const cg3::Point2d& boundingBoxMi
  * @brief DrawableTrapezoidalMap::draw allows drawing trapezoids and vertical lines and highlighting the query output trapezoid.
  */
 void DrawableTrapezoidalMap::draw() const {
-    // TODO
+    const std::vector<cg3::Point2d>& points = getPoints();
+    const std::vector<Trapezoid>& trapezoids = getTrapezoids();
+
+    const cg3::Color verticalLineColor(255, 0, 0);
+
+    const cg3::Segment2d boundingBoxTopSegment(cg3::Point2d(points[0].x(), points[1].y()), points[1]);
+    const cg3::Segment2d boundingBoxBottomSegment(points[0], cg3::Point2d(points[1].x(), points[0].y()));
+
+    for (size_t id = 0; id < trapezoids.size(); id++) {
+        const cg3::Segment2d& topSegment = (trapezoids[id].getTopSegment() == std::numeric_limits<size_t>::max()) ? boundingBoxTopSegment : getSegment(trapezoids[id].getTopSegment());
+        const cg3::Segment2d& bottomSegment = (trapezoids[id].getBottomSegment() == std::numeric_limits<size_t>::max()) ? boundingBoxBottomSegment : getSegment(trapezoids[id].getBottomSegment());
+
+        const cg3::Point2d& lowerLeftPoint = geometricUtils::intersection(bottomSegment, points[trapezoids[id].getLeftPoint()].x());
+        const cg3::Point2d& upperLeftPoint = geometricUtils::intersection(topSegment, points[trapezoids[id].getLeftPoint()].x());
+        const cg3::Point2d& upperRightPoint = geometricUtils::intersection(topSegment, points[trapezoids[id].getRightPoint()].x());
+        const cg3::Point2d& lowerRightPoint = geometricUtils::intersection(bottomSegment, points[trapezoids[id].getRightPoint()].x());
+
+        if (trapezoids[id].getLeftPoint() != 0)
+            cg3::opengl::drawLine2(lowerLeftPoint, upperLeftPoint, verticalLineColor);
+
+        if (trapezoids[id].getRightPoint() != 1)
+            cg3::opengl::drawLine2(lowerRightPoint, upperRightPoint, verticalLineColor);
+
+        glBegin(GL_POLYGON);
+
+        if (lastTrapezoidFound == id)
+            glColor3d(highlightColor.red() / 255.0, highlightColor.green() / 255.0, highlightColor.blue() / 255.0);
+        else
+            glColor3d(trapezoidColors[id].red() / 255.0, trapezoidColors[id].green() / 255.0, trapezoidColors[id].blue() / 255.0);
+
+        glVertex2d(lowerLeftPoint.x(), lowerLeftPoint.y());
+        glVertex2d(upperLeftPoint.x(), upperLeftPoint.y());
+        glVertex2d(upperRightPoint.x(), upperRightPoint.y());
+        glVertex2d(lowerRightPoint.x(), lowerRightPoint.y());
+
+        glEnd();
+    }
 }
 
 /**
