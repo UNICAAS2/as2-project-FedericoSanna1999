@@ -16,7 +16,10 @@ void algorithms::add(TrapezoidalMap& trapezoidalMap, DirectedAcyclicGraph& direc
 
     followSegment(trapezoidalMap, directedAcyclicGraph, trapezoidalMap.getSegment(id), intersectedTrapezoids);
 
-    // TODO: update data structures
+    if (intersectedTrapezoids.size() == 1)
+        update(trapezoidalMap, directedAcyclicGraph, id, intersectedTrapezoids[0]);
+    else
+        update(trapezoidalMap, directedAcyclicGraph, id, intersectedTrapezoids);
 }
 
 /**
@@ -110,4 +113,26 @@ void algorithms::followSegment(const TrapezoidalMap& trapezoidalMap, const Direc
                 follow = false;
         }
     }
+}
+
+/**
+ * @brief algorithms::update allows the trapezoidal map and the directed acyclic graph to be updated when a segment intersects a trapezoid.
+ * @param trapezoidalMap contains all points, segments, and trapezoids.
+ * @param directedAcyclicGraph contains all point, segment, and trapezoid nodes.
+ * @param segment is the segment which intersects the trapezoid.
+ * @param intersectedTrapezoid is the trapezoid intersected by the segment.
+ */
+void algorithms::update(TrapezoidalMap& trapezoidalMap, DirectedAcyclicGraph& directedAcyclicGraph, const size_t& segment, const size_t& intersectedTrapezoid) {
+    // TODO
+}
+
+/**
+ * @brief algorithms::update allows the trapezoidal map and the directed acyclic graph to be updated when a segment intersects more trapezoids.
+ * @param trapezoidalMap contains all points, segments, and trapezoids.
+ * @param directedAcyclicGraph contains all point, segment, and trapezoid nodes.
+ * @param segment is the segment which intersects the trapezoids.
+ * @param intersectedTrapezoids is the vector of trapezoids intersected by the segment.
+ */
+void algorithms::update(TrapezoidalMap &trapezoidalMap, DirectedAcyclicGraph &directedAcyclicGraph, const size_t& segment, const std::vector<size_t>& intersectedTrapezoids) {
+    // TODO
 }
