@@ -123,7 +123,16 @@ void algorithms::followSegment(const TrapezoidalMap& trapezoidalMap, const Direc
  * @param intersectedTrapezoid is the trapezoid intersected by the segment.
  */
 void algorithms::update(TrapezoidalMap& trapezoidalMap, DirectedAcyclicGraph& directedAcyclicGraph, const size_t& segment, const size_t& intersectedTrapezoid) {
-    // TODO
+    const std::vector<Trapezoid>& trapezoids = trapezoidalMap.getTrapezoids();
+    const TrapezoidalMap::IndexedSegment2d& indexedSegment = trapezoidalMap.getIndexedSegment(segment);
+    std::vector<size_t> newTrapezoids = {intersectedTrapezoid, trapezoids.size(), trapezoids.size() + 1};
+    std::vector<size_t> newTrapezoidNodes;
+    const bool leftPointUnshared = indexedSegment.first != trapezoids[intersectedTrapezoid].getLeftPoint();
+
+    if (leftPointUnshared && indexedSegment.second != trapezoids[intersectedTrapezoid].getRightPoint())
+        newTrapezoids.push_back(trapezoids.size() + 2);
+
+    directedAcyclicGraph.update(trapezoids[intersectedTrapezoid].getNode(), indexedSegment.first, indexedSegment.second, segment, newTrapezoids, newTrapezoidNodes, leftPointUnshared);
 }
 
 /**

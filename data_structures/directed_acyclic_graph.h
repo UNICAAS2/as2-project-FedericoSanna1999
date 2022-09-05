@@ -13,6 +13,9 @@ class DirectedAcyclicGraph {
 public:
     DirectedAcyclicGraph();
 
+    void update(const size_t& nodeToDelete, const size_t& leftPoint, const size_t& rightPoint, const size_t& segment, const std::vector<size_t>& newTrapezoids, std::vector<size_t>& newTrapezoidNodes, const bool& leftPointUnshared);
+
+
     const std::vector<Node>& getNodes() const;
     const Node& getNode(const size_t& id) const;
     Node& getNode(const size_t& id);
