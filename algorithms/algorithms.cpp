@@ -133,6 +133,7 @@ void algorithms::update(TrapezoidalMap& trapezoidalMap, DirectedAcyclicGraph& di
         newTrapezoids.push_back(trapezoids.size() + 2);
 
     directedAcyclicGraph.update(trapezoids[intersectedTrapezoid].getNode(), indexedSegment.first, indexedSegment.second, segment, newTrapezoids, newTrapezoidNodes, leftPointUnshared);
+    trapezoidalMap.update(intersectedTrapezoid, indexedSegment.first, indexedSegment.second, segment, newTrapezoids, newTrapezoidNodes, leftPointUnshared);
 }
 
 /**

@@ -240,6 +240,96 @@ void TrapezoidalMap::clear() {
 }
 
 /**
+ * @brief TrapezoidalMap::update allows the trapezoidal map to be updated when the new segment intersects a trapezoid.
+ * @param trapezoidToDelete is the trapezoid index intersected by the segment.
+ * @param leftPoint is the left point of the segment which intersects the trapezoid.
+ * @param rightPoint is the right point of the segment which intersects the trapezoid.
+ * @param segment is the index of the segment which intersects the trapezoid.
+ * @param newTrapezoids is the vector which contains the new trapezoids indexes.
+ * @param newTrapezoidNodes is the vector which contains the indexes of the new trapezoid nodes.
+ * @param leftPointUnshared is a boolean variable which is true when the left point is a new point in the trapezoidal map, otherwise it is false.
+ */
+void TrapezoidalMap::update(const size_t& trapezoidToDelete, const size_t& leftPoint, const size_t& rightPoint, const size_t& segment, const std::vector<size_t>& newTrapezoids, const std::vector<size_t>& newTrapezoidNodes, const bool& leftPointUnshared) {
+    Trapezoid upperTrapezoid(trapezoids[trapezoidToDelete].getTopSegment(), segment, leftPoint, rightPoint, newTrapezoidNodes[0]);
+    Trapezoid lowerTrapezoid(segment, trapezoids[trapezoidToDelete].getBottomSegment(), leftPoint, rightPoint, newTrapezoidNodes[1]);
+    Trapezoid leftTrapezoid(trapezoids[trapezoidToDelete].getTopSegment(), trapezoids[trapezoidToDelete].getBottomSegment(), trapezoids[trapezoidToDelete].getLeftPoint(), leftPoint, newTrapezoidNodes[2]);
+    Trapezoid rightTrapezoid(trapezoids[trapezoidToDelete].getTopSegment(), trapezoids[trapezoidToDelete].getBottomSegment(), rightPoint, trapezoids[trapezoidToDelete].getRightPoint(), newTrapezoidNodes.back());
+
+    if (leftPointUnshared) {
+        leftTrapezoid.setUpperRightNeighbour(newTrapezoids[0]);
+        leftTrapezoid.setLowerRightNeighbour(newTrapezoids[1]);
+        leftTrapezoid.setUpperLeftNeighbour(trapezoids[trapezoidToDelete].getUpperLeftNeighbour());
+        leftTrapezoid.setLowerLeftNeighbour(trapezoids[trapezoidToDelete].getLowerLeftNeighbour());
+        upperTrapezoid.setUpperLeftNeighbour(newTrapezoids[2]);
+        lowerTrapezoid.setLowerLeftNeighbour(newTrapezoids[2]);
+
+        if (leftTrapezoid.getUpperLeftNeighbour() != std::numeric_limits<size_t>::max())
+            trapezoids[leftTrapezoid.getUpperLeftNeighbour()].setUpperRightNeighbour(newTrapezoids[2]);
+
+        if (leftTrapezoid.getLowerLeftNeighbour() != std::numeric_limits<size_t>::max())
+            trapezoids[leftTrapezoid.getLowerLeftNeighbour()].setLowerRightNeighbour(newTrapezoids[2]);
+
+        if (newTrapezoidNodes.size() != 4) {
+            if (getIndexedSegment(upperTrapezoid.getTopSegment()).second != getIndexedSegment(upperTrapezoid.getBottomSegment()).second) {
+                upperTrapezoid.setUpperRightNeighbour(trapezoids[trapezoidToDelete].getUpperRightNeighbour());
+
+                if (upperTrapezoid.getUpperRightNeighbour() != std::numeric_limits<size_t>::max())
+                    trapezoids[upperTrapezoid.getUpperRightNeighbour()].setUpperLeftNeighbour(newTrapezoids[0]);
+            }
+
+            if (getIndexedSegment(lowerTrapezoid.getTopSegment()).second != getIndexedSegment(lowerTrapezoid.getBottomSegment()).second) {
+                lowerTrapezoid.setLowerRightNeighbour(trapezoids[trapezoidToDelete].getLowerRightNeighbour());
+
+                if (lowerTrapezoid.getLowerRightNeighbour() != std::numeric_limits<size_t>::max())
+                    trapezoids[lowerTrapezoid.getLowerRightNeighbour()].setLowerLeftNeighbour(newTrapezoids[1]);
+            }
+        }
+
+    } else {
+        if (getIndexedSegment(upperTrapezoid.getTopSegment()).first != getIndexedSegment(upperTrapezoid.getBottomSegment()).first) {
+            upperTrapezoid.setUpperLeftNeighbour(trapezoids[trapezoidToDelete].getUpperLeftNeighbour());
+
+            if (upperTrapezoid.getUpperLeftNeighbour() != std::numeric_limits<size_t>::max())
+                trapezoids[upperTrapezoid.getUpperLeftNeighbour()].setUpperRightNeighbour(newTrapezoids[0]);
+        }
+
+        if (getIndexedSegment(lowerTrapezoid.getTopSegment()).first != getIndexedSegment(lowerTrapezoid.getBottomSegment()).first) {
+            lowerTrapezoid.setLowerLeftNeighbour(trapezoids[trapezoidToDelete].getLowerLeftNeighbour());
+
+            if (lowerTrapezoid.getLowerLeftNeighbour() != std::numeric_limits<size_t>::max())
+                trapezoids[lowerTrapezoid.getLowerLeftNeighbour()].setLowerRightNeighbour(newTrapezoids[1]);
+        }
+    }
+
+    if (!leftPointUnshared || newTrapezoids.size() == 4) {
+        rightTrapezoid.setUpperLeftNeighbour(newTrapezoids[0]);
+        rightTrapezoid.setLowerLeftNeighbour(newTrapezoids[1]);
+        rightTrapezoid.setUpperRightNeighbour(trapezoids[trapezoidToDelete].getUpperRightNeighbour());
+        rightTrapezoid.setLowerRightNeighbour(trapezoids[trapezoidToDelete].getLowerRightNeighbour());
+        upperTrapezoid.setUpperRightNeighbour(newTrapezoids.back());
+        lowerTrapezoid.setLowerRightNeighbour(newTrapezoids.back());
+
+        if (rightTrapezoid.getUpperRightNeighbour() != std::numeric_limits<size_t>::max())
+            trapezoids[rightTrapezoid.getUpperRightNeighbour()].setUpperLeftNeighbour(newTrapezoids.back());
+
+        if (rightTrapezoid.getLowerRightNeighbour() != std::numeric_limits<size_t>::max())
+            trapezoids[rightTrapezoid.getLowerRightNeighbour()].setLowerLeftNeighbour(newTrapezoids.back());
+    }
+
+    trapezoids[trapezoidToDelete] = upperTrapezoid;
+
+    trapezoids.push_back(lowerTrapezoid);
+
+    if (leftPointUnshared) {
+        trapezoids.push_back(leftTrapezoid);
+
+        if (newTrapezoidNodes.size() == 4)
+            trapezoids.push_back(rightTrapezoid);
+    } else
+        trapezoids.push_back(rightTrapezoid);
+}
+
+/**
  * @brief TrapezoidalMap::getTrapezoids returns the vector "trapezoids".
  * @return the vector "trapezoids".
  */
