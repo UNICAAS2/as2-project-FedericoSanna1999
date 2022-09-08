@@ -144,5 +144,54 @@ void algorithms::update(TrapezoidalMap& trapezoidalMap, DirectedAcyclicGraph& di
  * @param intersectedTrapezoids is the vector of trapezoids intersected by the segment.
  */
 void algorithms::update(TrapezoidalMap &trapezoidalMap, DirectedAcyclicGraph &directedAcyclicGraph, const size_t& segment, const std::vector<size_t>& intersectedTrapezoids) {
+    const std::vector<cg3::Point2d>& points = trapezoidalMap.getPoints();
+    const std::vector<Trapezoid>& trapezoids = trapezoidalMap.getTrapezoids();
+    const TrapezoidalMap::IndexedSegment2d& indexedSegment = trapezoidalMap.getIndexedSegment(segment);
+
+    // leftPoint is null if the point already exists, else it is the segment's left point.
+    const size_t& leftPoint = (trapezoids[intersectedTrapezoids.front()].getLeftPoint() == indexedSegment.first) ? std::numeric_limits<size_t>::max() : indexedSegment.first;
+
+    // rightPoint is null if the point already exists, else it is the segment's right point.
+    const size_t& rightPoint = (trapezoids[intersectedTrapezoids.back()].getRightPoint() == indexedSegment.second) ? std::numeric_limits<size_t>::max() : indexedSegment.second;
+
+    std::vector<size_t> newTrapezoids = {trapezoids.size()};
+    std::vector<size_t> newTrapezoidNodes;
+    std::vector<size_t> nodesToDelete, leftChildren, rightChildren;
+    std::vector<bool> above;
+
+    // if leftPoint is not null, the first trapezoid intersected by the segment is divided into 3 trapezoids.
+    if (leftPoint == indexedSegment.first)
+        newTrapezoids.push_back(trapezoids.size() + 1);
+
+    // if rightPoint is not null, the last trapezoid intersected by the segment is divided into 3 trapezoids.
+    if (rightPoint == indexedSegment.second)
+        newTrapezoids.push_back(trapezoids.size() + newTrapezoids.size());
+
+    for (const size_t& trapezoid : intersectedTrapezoids) {
+        // store node index of the trapezoid intersected by the segment.
+        nodesToDelete.push_back(trapezoids[trapezoid].getNode());
+
+        // check if the right point (left point only for the last trapezoid intersected) is at left of the segment.
+        const size_t& queryPoint = (trapezoid == intersectedTrapezoids.back()) ? trapezoids[trapezoid].getLeftPoint() : trapezoids[trapezoid].getRightPoint();
+        above.push_back(cg3::isPointAtLeft(points[indexedSegment.first], points[indexedSegment.second], points[queryPoint]));
+
+        // if the trapezoid is above of the segment, the trapezoid is the left child of the new segment nodes in the directed acyclic graph, otherwise it is the right one.
+        if (above.back())
+            while (leftChildren.size() < nodesToDelete.size())
+                leftChildren.push_back(trapezoids[trapezoid].getNode());
+        else
+            while (rightChildren.size() < nodesToDelete.size())
+                rightChildren.push_back(trapezoids[trapezoid].getNode());
+    }
+
+    while (leftChildren.size() < nodesToDelete.size())
+        leftChildren.push_back(std::numeric_limits<size_t>::max());
+
+    while (rightChildren.size() < nodesToDelete.size())
+        rightChildren.push_back(std::numeric_limits<size_t>::max());
+
     // TODO
+    // directedAcyclicGraph.update(nodesToDelete, leftPoint, rightPoint, segment, newTrapezoids, newTrapezoidNodes, leftChildren, rightChildren);
+    // trapezoidalMap.update(intersectedTrapezoids, leftPoint, rightPoint, segment, newTrapezoids, newTrapezoidNodes, above);
+
 }
