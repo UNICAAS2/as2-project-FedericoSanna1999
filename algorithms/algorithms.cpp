@@ -190,8 +190,8 @@ void algorithms::update(TrapezoidalMap &trapezoidalMap, DirectedAcyclicGraph &di
     while (rightChildren.size() < nodesToDelete.size())
         rightChildren.push_back(std::numeric_limits<size_t>::max());
 
-    // TODO
-    // directedAcyclicGraph.update(nodesToDelete, leftPoint, rightPoint, segment, newTrapezoids, newTrapezoidNodes, leftChildren, rightChildren);
-    // trapezoidalMap.update(intersectedTrapezoids, leftPoint, rightPoint, segment, newTrapezoids, newTrapezoidNodes, above);
+    directedAcyclicGraph.update(nodesToDelete, leftPoint, rightPoint, segment, newTrapezoids, newTrapezoidNodes, leftChildren, rightChildren);
 
+    // TODO
+    // trapezoidalMap.update(intersectedTrapezoids, leftPoint, rightPoint, segment, newTrapezoids, newTrapezoidNodes, above);
 }

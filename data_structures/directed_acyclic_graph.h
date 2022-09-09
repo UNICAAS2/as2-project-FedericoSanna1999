@@ -14,7 +14,7 @@ public:
     DirectedAcyclicGraph();
 
     void update(const size_t& nodeToDelete, const size_t& leftPoint, const size_t& rightPoint, const size_t& segment, const std::vector<size_t>& newTrapezoids, std::vector<size_t>& newTrapezoidNodes, const bool& leftPointUnshared);
-
+    void update(std::vector<size_t>& nodesToDelete, const size_t& leftPoint, const size_t& rightPoint, const size_t& segment, const std::vector<size_t>& newTrapezoids, std::vector<size_t>& newTrapezoidNodes, std::vector<size_t>& leftChildren, std::vector<size_t>& rightChildren);
 
     const std::vector<Node>& getNodes() const;
     const Node& getNode(const size_t& id) const;
