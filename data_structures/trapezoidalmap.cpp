@@ -330,6 +330,91 @@ void TrapezoidalMap::update(const size_t& trapezoidToDelete, const size_t& leftP
 }
 
 /**
+ * @brief TrapezoidalMap::update allows the trapezoidal map to be updated when the new segment intersects more trapezoids.
+ * @param trapezoidsToDelete is the vector which contains the indexes of the intersected trapezoids.
+ * @param leftPoint is the left point of the segment which intersects the trapezoids.
+ * @param rightPoint is the right point of the segment which intersects the trapezoids.
+ * @param segment is the index of the segment which intersects the trapezoids.
+ * @param newTrapezoids is the vector which contains the new trapezoids indexes.
+ * @param newTrapezoidNodes is the vector which contains the indexes of the new trapezoid nodes.
+ * @param above is the vector which contains boolean variables which indicate for each trapezoid to be deleted whether it is above the segment.
+ */
+void TrapezoidalMap::update(const std::vector<size_t>& trapezoidsToDelete, const size_t& leftPoint, const size_t& rightPoint, const size_t& segment, const std::vector<size_t>& newTrapezoids, const std::vector<size_t>& newTrapezoidNodes, const std::vector<bool>& above) {
+    // store the index of the first intersected trapezoid
+    const size_t& front = trapezoidsToDelete.front();
+
+    // store the index of the last intersected trapezoid
+    const size_t& back = trapezoidsToDelete.back();
+
+    // store the index of the possible right trapezoid
+    const size_t& lastTrapezoidId = newTrapezoids[newTrapezoids.size() - 2];
+
+    std::vector<size_t>::const_iterator trapezoidNodeToAssign = newTrapezoidNodes.cbegin();
+
+    // create the new trapezoid to the left of the left point of the segment
+    Trapezoid leftTrapezoid(trapezoids[front].getTopSegment(), trapezoids[front].getBottomSegment(), trapezoids[front].getLeftPoint(), leftPoint, *trapezoidNodeToAssign);
+
+    // if the left point of the segment is a new point
+    if (leftPoint != std::numeric_limits<size_t>::max()) {
+        // reference the next trapezoid node to assign
+        trapezoidNodeToAssign++;
+
+        // the left point of the segment is the new left point of the first intersected trapezoid
+        trapezoids[front].setLeftPoint(leftPoint);
+
+        // update upper neighbours of the new left trapezoid
+        if (trapezoids[front].getUpperLeftNeighbour() != std::numeric_limits<size_t>::max()) {
+            leftTrapezoid.setUpperLeftNeighbour(trapezoids[front].getUpperLeftNeighbour());
+            trapezoids[leftTrapezoid.getUpperLeftNeighbour()].setUpperRightNeighbour(newTrapezoids[0]);
+        }
+
+        // update lower neighbours of the new left trapezoid
+        if (trapezoids[front].getLowerLeftNeighbour() != std::numeric_limits<size_t>::max()) {
+            leftTrapezoid.setLowerLeftNeighbour(trapezoids[front].getLowerLeftNeighbour());
+            trapezoids[leftTrapezoid.getLowerLeftNeighbour()].setLowerRightNeighbour(newTrapezoids[0]);
+        }
+
+        // update neighbours of the first intersected trapezoid
+        trapezoids[front].setUpperLeftNeighbour(newTrapezoids[0]);
+        trapezoids[front].setLowerLeftNeighbour(newTrapezoids[0]);
+
+        // the new left trapezoid is stored
+        trapezoids.push_back(leftTrapezoid);
+    }
+
+    // create the new trapezoid to the right of the right point of the segment
+    Trapezoid rightTrapezoid(trapezoids[back].getTopSegment(), trapezoids[back].getBottomSegment(), rightPoint, trapezoids[back].getRightPoint(), *trapezoidNodeToAssign);
+
+    // if the right point of the segment is a new point
+    if (rightPoint != std::numeric_limits<size_t>::max()) {
+        // reference the next trapezoid node to assign
+        trapezoidNodeToAssign++;
+
+        // the right point of the segment is the new right point of the last intersected trapezoid
+        trapezoids[back].setRightPoint(rightPoint);
+
+        // update upper neighbours of the new right trapezoid
+        if (trapezoids[back].getUpperRightNeighbour() != std::numeric_limits<size_t>::max()) {
+            rightTrapezoid.setUpperRightNeighbour(trapezoids[back].getUpperRightNeighbour());
+            trapezoids[rightTrapezoid.getUpperRightNeighbour()].setUpperLeftNeighbour(lastTrapezoidId);
+        }
+
+        // update lower neighbours of the new right trapezoid
+        if (trapezoids[back].getLowerRightNeighbour() != std::numeric_limits<size_t>::max()) {
+            rightTrapezoid.setLowerRightNeighbour(trapezoids[back].getLowerRightNeighbour());
+            trapezoids[rightTrapezoid.getLowerRightNeighbour()].setLowerLeftNeighbour(lastTrapezoidId);
+        }
+
+        // update neighbours of the last intersected trapezoid
+        trapezoids[back].setUpperRightNeighbour(lastTrapezoidId);
+        trapezoids[back].setLowerRightNeighbour(lastTrapezoidId);
+
+        // the new right trapezoid is stored
+        trapezoids.push_back(rightTrapezoid);
+    }
+}
+
+/**
  * @brief TrapezoidalMap::getTrapezoids returns the vector "trapezoids".
  * @return the vector "trapezoids".
  */

@@ -35,6 +35,7 @@ public:
     void clear();
 
     void update(const size_t& trapezoidToDelete, const size_t& leftPoint, const size_t& rightPoint, const size_t& segment, const std::vector<size_t>& newTrapezoids, const std::vector<size_t>& newTrapezoidNodes, const bool& leftPointUnshared);
+    void update(const std::vector<size_t>& trapezoidsToDelete, const size_t& leftPoint, const size_t& rightPoint, const size_t& segment, const std::vector<size_t>& newTrapezoids, const std::vector<size_t>& newTrapezoidNodes, const std::vector<bool>& above);
 
     const std::vector<Trapezoid>& getTrapezoids() const;
     const Trapezoid& getTrapezoid(const size_t& id) const;
