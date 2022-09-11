@@ -350,6 +350,16 @@ void TrapezoidalMap::update(const std::vector<size_t>& trapezoidsToDelete, const
     const size_t& lastTrapezoidId = newTrapezoids[newTrapezoids.size() - 2];
 
     std::vector<size_t>::const_iterator trapezoidNodeToAssign = newTrapezoidNodes.cbegin();
+    std::vector<bool>::const_iterator isAbove = above.cbegin();
+
+    std::vector<size_t> upperLeftNeighboursAbove;
+    std::vector<size_t> lowerLeftNeighboursBelow;
+
+    size_t leftPointAbove = indexedSegments[segment].first;
+    size_t leftPointBelow = indexedSegments[segment].first;
+
+    size_t lowerLeftNeighbourAbove = std::numeric_limits<size_t>::max();
+    size_t upperLeftNeighbourBelow = std::numeric_limits<size_t>::max();
 
     // create the new trapezoid to the left of the left point of the segment
     Trapezoid leftTrapezoid(trapezoids[front].getTopSegment(), trapezoids[front].getBottomSegment(), trapezoids[front].getLeftPoint(), leftPoint, *trapezoidNodeToAssign);
@@ -412,6 +422,149 @@ void TrapezoidalMap::update(const std::vector<size_t>& trapezoidsToDelete, const
         // the new right trapezoid is stored
         trapezoids.push_back(rightTrapezoid);
     }
+
+    // create the new trapezoid which is obtain with the last merge
+    Trapezoid newTrapezoid(trapezoids[back].getTopSegment(), trapezoids[back].getBottomSegment(), trapezoids[back].getLeftPoint(), trapezoids[back].getRightPoint(), newTrapezoidNodes.back());
+
+    // update neighbours of the new trapezoid
+    newTrapezoid.setUpperLeftNeighbour(trapezoids[back].getUpperLeftNeighbour());
+    newTrapezoid.setLowerLeftNeighbour(trapezoids[back].getLowerLeftNeighbour());
+    newTrapezoid.setUpperRightNeighbour(trapezoids[back].getUpperRightNeighbour());
+    newTrapezoid.setLowerRightNeighbour(trapezoids[back].getLowerRightNeighbour());
+
+    for (const size_t& trapezoid : trapezoidsToDelete) {
+        // assign the new trapezoid node and reference to the next one
+        trapezoids[trapezoid].setNode(*trapezoidNodeToAssign);
+        trapezoidNodeToAssign++;
+
+        // if the trapezoid to be deleted is above the segment
+        if (*isAbove) {
+            // new segment is the bottom segment of the trapezoid
+            trapezoids[trapezoid].setBottomSegment(segment);
+
+            // update the left point of the trapezoid and store the right point as the left point for the next trapezoid which is above the segment
+            trapezoids[trapezoid].setLeftPoint(leftPointAbove);
+            leftPointAbove = trapezoids[trapezoid].getRightPoint();
+
+            // store the old lower left neighbour before the update, if it is not stored
+            if (lowerLeftNeighboursBelow.empty())
+                lowerLeftNeighboursBelow.push_back(trapezoids[trapezoid].getLowerLeftNeighbour());
+
+            // update the lower left neighbour, which is the previous trapezoid which was above the segment
+            trapezoids[trapezoid].setLowerLeftNeighbour(lowerLeftNeighbourAbove);
+
+            if (lowerLeftNeighbourAbove != std::numeric_limits<size_t>::max())
+                trapezoids[lowerLeftNeighbourAbove].setLowerRightNeighbour(trapezoid);
+
+            // update the upper left neighbours if it is stored previously and clear it
+            if (!upperLeftNeighboursAbove.empty()) {
+                trapezoids[trapezoid].setUpperLeftNeighbour(upperLeftNeighboursAbove.front());
+                upperLeftNeighboursAbove.clear();
+            }
+
+            if (trapezoids[trapezoid].getUpperLeftNeighbour() != std::numeric_limits<size_t>::max())
+                trapezoids[trapezoids[trapezoid].getUpperLeftNeighbour()].setUpperRightNeighbour(trapezoid);
+
+            trapezoids[trapezoid].setLowerRightNeighbour(std::numeric_limits<size_t>::max());
+
+            if (trapezoids[trapezoid].getUpperRightNeighbour() != std::numeric_limits<size_t>::max())
+                trapezoids[trapezoids[trapezoid].getUpperRightNeighbour()].setUpperLeftNeighbour(trapezoid);
+
+            // store the trapezoid as the lower left neighbour for the next trapezoid which is above the segment
+            lowerLeftNeighbourAbove = trapezoid;
+        } else {
+            // new segment is the top segment of the trapezoid
+            trapezoids[trapezoid].setTopSegment(segment);
+
+            // update the left point of the trapezoid and store the right point as the left point for the next trapezoid which is below the segment
+            trapezoids[trapezoid].setLeftPoint(leftPointBelow);
+            leftPointBelow = trapezoids[trapezoid].getRightPoint();
+
+            // store the old upper left neighbour before the update, if it is not stored
+            if (upperLeftNeighboursAbove.empty())
+                upperLeftNeighboursAbove.push_back(trapezoids[trapezoid].getUpperLeftNeighbour());
+
+            // update the upper left neighbour, which is the previous trapezoid which was below the segment
+            trapezoids[trapezoid].setUpperLeftNeighbour(upperLeftNeighbourBelow);
+
+            if (upperLeftNeighbourBelow != std::numeric_limits<size_t>::max())
+                trapezoids[upperLeftNeighbourBelow].setUpperRightNeighbour(trapezoid);
+
+            // update the lower left neighbours if it is stored previously and clear it
+            if (!lowerLeftNeighboursBelow.empty()) {
+                trapezoids[trapezoid].setLowerLeftNeighbour(lowerLeftNeighboursBelow.front());
+                lowerLeftNeighboursBelow.clear();
+            }
+
+            if (trapezoids[trapezoid].getLowerLeftNeighbour() != std::numeric_limits<size_t>::max())
+                trapezoids[trapezoids[trapezoid].getLowerLeftNeighbour()].setLowerRightNeighbour(trapezoid);
+
+            trapezoids[trapezoid].setUpperRightNeighbour(std::numeric_limits<size_t>::max());
+
+            if (trapezoids[trapezoid].getLowerRightNeighbour() != std::numeric_limits<size_t>::max())
+                trapezoids[trapezoids[trapezoid].getLowerRightNeighbour()].setLowerLeftNeighbour(trapezoid);
+
+            // store the trapezoid as the upper left neighbour for the next trapezoid which is below the segment
+            upperLeftNeighbourBelow = trapezoid;
+        }
+
+        // reference the next boolean variable for the next trapezoid
+        isAbove++;
+    }
+
+    // if the last intersected trapezoid is below the segment, the new trapezoid is above it.
+    if (!above.back()) {
+        // new segment is the bottom segment of the new trapezoid
+        newTrapezoid.setBottomSegment(segment);
+
+        // update the left point of the new trapezoid
+        newTrapezoid.setLeftPoint(leftPointAbove);
+
+        // update the lower left neighbour, which is the previous trapezoid which was above the segment
+        newTrapezoid.setLowerLeftNeighbour(lowerLeftNeighbourAbove);
+
+        if (lowerLeftNeighbourAbove != std::numeric_limits<size_t>::max())
+            trapezoids[lowerLeftNeighbourAbove].setLowerRightNeighbour(newTrapezoids.back());
+
+        // update the upper left neighbours if it is stored previously
+        if (!upperLeftNeighboursAbove.empty())
+            newTrapezoid.setUpperLeftNeighbour(upperLeftNeighboursAbove.front());
+
+        if (newTrapezoid.getUpperLeftNeighbour() != std::numeric_limits<size_t>::max())
+            trapezoids[newTrapezoid.getUpperLeftNeighbour()].setUpperRightNeighbour(newTrapezoids.back());
+
+        newTrapezoid.setLowerRightNeighbour(std::numeric_limits<size_t>::max());
+
+        if (newTrapezoid.getUpperRightNeighbour() != std::numeric_limits<size_t>::max())
+            trapezoids[newTrapezoid.getUpperRightNeighbour()].setUpperLeftNeighbour(newTrapezoids.back());
+    } else {
+        // new segment is the top segment of the new trapezoid
+        newTrapezoid.setTopSegment(segment);
+
+        // update the left point of the new trapezoid
+        newTrapezoid.setLeftPoint(leftPointBelow);
+
+        // update the upper left neighbour, which is the previous trapezoid which was below the segment
+        newTrapezoid.setUpperLeftNeighbour(upperLeftNeighbourBelow);
+
+        if (upperLeftNeighbourBelow != std::numeric_limits<size_t>::max())
+            trapezoids[upperLeftNeighbourBelow].setUpperRightNeighbour(newTrapezoids.back());
+
+        // update the lower left neighbours if it is stored previously
+        if (!lowerLeftNeighboursBelow.empty())
+            newTrapezoid.setLowerLeftNeighbour(lowerLeftNeighboursBelow.front());
+
+        if (newTrapezoid.getLowerLeftNeighbour() != std::numeric_limits<size_t>::max())
+            trapezoids[newTrapezoid.getLowerLeftNeighbour()].setLowerRightNeighbour(newTrapezoids.back());
+
+        newTrapezoid.setUpperRightNeighbour(std::numeric_limits<size_t>::max());
+
+        if (newTrapezoid.getLowerRightNeighbour() != std::numeric_limits<size_t>::max())
+            trapezoids[newTrapezoid.getLowerRightNeighbour()].setLowerLeftNeighbour(newTrapezoids.back());
+    }
+
+    // the new trapezoid is stored
+    trapezoids.push_back(newTrapezoid);
 }
 
 /**
