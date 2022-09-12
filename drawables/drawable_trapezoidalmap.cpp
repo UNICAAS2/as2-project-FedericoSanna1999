@@ -21,33 +21,43 @@ void DrawableTrapezoidalMap::draw() const {
     const std::vector<cg3::Point2d>& points = getPoints();
     const std::vector<Trapezoid>& trapezoids = getTrapezoids();
 
+    // red color to draw vertical lines
     const cg3::Color verticalLineColor(255, 0, 0);
 
+    // create the top and the bottom segment of the bounding box
     const cg3::Segment2d boundingBoxTopSegment(cg3::Point2d(points[0].x(), points[1].y()), points[1]);
     const cg3::Segment2d boundingBoxBottomSegment(points[0], cg3::Point2d(points[1].x(), points[0].y()));
 
     for (size_t id = 0; id < trapezoids.size(); id++) {
+        // get the top and the bottom segment of the trapezoid to be drawn
         const cg3::Segment2d& topSegment = (trapezoids[id].getTopSegment() == std::numeric_limits<size_t>::max()) ? boundingBoxTopSegment : getSegment(trapezoids[id].getTopSegment());
         const cg3::Segment2d& bottomSegment = (trapezoids[id].getBottomSegment() == std::numeric_limits<size_t>::max()) ? boundingBoxBottomSegment : getSegment(trapezoids[id].getBottomSegment());
 
+        // get the points of the trapezoid to be drawn by calculating the intersections
         const cg3::Point2d& lowerLeftPoint = geometricUtils::intersection(bottomSegment, points[trapezoids[id].getLeftPoint()].x());
         const cg3::Point2d& upperLeftPoint = geometricUtils::intersection(topSegment, points[trapezoids[id].getLeftPoint()].x());
         const cg3::Point2d& upperRightPoint = geometricUtils::intersection(topSegment, points[trapezoids[id].getRightPoint()].x());
         const cg3::Point2d& lowerRightPoint = geometricUtils::intersection(bottomSegment, points[trapezoids[id].getRightPoint()].x());
 
+        // if the left point is not the lower left point of the bounding box
         if (trapezoids[id].getLeftPoint() != 0)
+            // draw the red vertical line
             cg3::opengl::drawLine2(lowerLeftPoint, upperLeftPoint, verticalLineColor);
 
+        // if the right point is not the upper right point the bounding box
         if (trapezoids[id].getRightPoint() != 1)
+            // draw the red vertical line
             cg3::opengl::drawLine2(lowerRightPoint, upperRightPoint, verticalLineColor);
 
         glBegin(GL_POLYGON);
 
+        // set the color to use to draw the trapezoid (highlightColor if it is the last trapezoid found)
         if (lastTrapezoidFound == id)
             glColor3d(highlightColor.red() / 255.0, highlightColor.green() / 255.0, highlightColor.blue() / 255.0);
         else
             glColor3d(trapezoidColors[id].red() / 255.0, trapezoidColors[id].green() / 255.0, trapezoidColors[id].blue() / 255.0);
 
+        // set the vertices of the trapezoid
         glVertex2d(lowerLeftPoint.x(), lowerLeftPoint.y());
         glVertex2d(upperLeftPoint.x(), upperLeftPoint.y());
         glVertex2d(upperRightPoint.x(), upperRightPoint.y());
@@ -88,11 +98,14 @@ void DrawableTrapezoidalMap::addTrapezoidColors() {
     const size_t& trapezoidNumber = getTrapezoids().size();
     cg3::Color trapezoidColor;
 
+    // if there are not enough colors
     while (trapezoidColors.size() < trapezoidNumber) {
+        // generate a random color which is different from the highlight color
         do {
             trapezoidColor = cg3::Color(std::rand() % 256, std::rand() % 256, std::rand() % 256);
         } while (trapezoidColor == highlightColor);
 
+        // store the new random color
         trapezoidColors.push_back(trapezoidColor);
     }
 }

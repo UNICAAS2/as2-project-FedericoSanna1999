@@ -125,10 +125,13 @@ void algorithms::followSegment(const TrapezoidalMap& trapezoidalMap, const Direc
 void algorithms::update(TrapezoidalMap& trapezoidalMap, DirectedAcyclicGraph& directedAcyclicGraph, const size_t& segment, const size_t& intersectedTrapezoid) {
     const std::vector<Trapezoid>& trapezoids = trapezoidalMap.getTrapezoids();
     const TrapezoidalMap::IndexedSegment2d& indexedSegment = trapezoidalMap.getIndexedSegment(segment);
+
+    // indexes of the new trapezoids (minimum 3)
     std::vector<size_t> newTrapezoids = {intersectedTrapezoid, trapezoids.size(), trapezoids.size() + 1};
     std::vector<size_t> newTrapezoidNodes;
     const bool leftPointUnshared = indexedSegment.first != trapezoids[intersectedTrapezoid].getLeftPoint();
 
+    // add a fourth index for a new trapezoid if the segment points are new
     if (leftPointUnshared && indexedSegment.second != trapezoids[intersectedTrapezoid].getRightPoint())
         newTrapezoids.push_back(trapezoids.size() + 2);
 
@@ -184,6 +187,7 @@ void algorithms::update(TrapezoidalMap &trapezoidalMap, DirectedAcyclicGraph &di
                 rightChildren.push_back(trapezoids[trapezoid].getNode());
     }
 
+    // fill the vectors "leftChildren" and "rightChildren" with a null values for missing children
     while (leftChildren.size() < nodesToDelete.size())
         leftChildren.push_back(std::numeric_limits<size_t>::max());
 

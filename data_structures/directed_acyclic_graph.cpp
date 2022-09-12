@@ -23,38 +23,49 @@ void DirectedAcyclicGraph::update(const size_t& nodeToDelete, const size_t& left
 
     Node segmentNode(Node::SEGMENT, segment);
 
+    // the left child of the segment node is the upper trapezoid node
     segmentNode.setLeftChild(nodes.size());
     newTrapezoidNodes.push_back(nodes.size());
     nodes.push_back(upperTrapezoidNode);
 
+    // the right child of the segment node is the lower trapezoid node
     segmentNode.setRightChild(nodes.size());
     newTrapezoidNodes.push_back(nodes.size());
     nodes.push_back(lowerTrapezoidNode);
 
     Node rightPointNode(Node::POINT, rightPoint);
 
+    // the left child of the right point node is the segment node
     rightPointNode.setLeftChild(nodes.size());
     nodes.push_back(segmentNode);
 
     Node leftPointNode(Node::POINT, leftPoint);
 
+    // if the left point of the segment is a new point
     if (leftPointUnshared) {
         const Node leftTrapezoidNode(Node::TRAPEZOID, newTrapezoids[2]);
+
+        // the left child of the left point node is the left trapezoid node
         leftPointNode.setLeftChild(nodes.size());
         newTrapezoidNodes.push_back(nodes.size());
         nodes.push_back(leftTrapezoidNode);
     }
 
+    // if the right point of the segment is a new point
     if (!leftPointUnshared || newTrapezoids.size() == 4) {
         const Node rightTrapezoidNode(Node::TRAPEZOID, newTrapezoids.back());
+
+        // the right child of the right point node is the right trapezoid node
         rightPointNode.setRightChild(nodes.size());
         newTrapezoidNodes.push_back(nodes.size());
         nodes.push_back(rightTrapezoidNode);
     }
 
+    // the right child of the left point nod is the right point node
     leftPointNode.setRightChild(nodes.size());
     nodes.push_back(rightPointNode);
 
+    // the node of the trapezoid to be deleted is update with the node of the left point
     nodes[nodeToDelete] = leftPointNode;
 }
 

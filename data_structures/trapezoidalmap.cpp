@@ -208,7 +208,7 @@ cg3::Segment2d TrapezoidalMap::getSegment(const size_t& id) const {
  * @param id is the indexed segment position in the vector "indexedSegments".
  * @return the indexed segment in the vector "indexedSegments" in the position "id".
  */
-const TrapezoidalMap::IndexedSegment2d &TrapezoidalMap::getIndexedSegment(const size_t& id) const {
+const TrapezoidalMap::IndexedSegment2d& TrapezoidalMap::getIndexedSegment(const size_t& id) const {
     return indexedSegments[id];
 }
 
@@ -250,12 +250,15 @@ void TrapezoidalMap::clear() {
  * @param leftPointUnshared is a boolean variable which is true when the left point is a new point in the trapezoidal map, otherwise it is false.
  */
 void TrapezoidalMap::update(const size_t& trapezoidToDelete, const size_t& leftPoint, const size_t& rightPoint, const size_t& segment, const std::vector<size_t>& newTrapezoids, const std::vector<size_t>& newTrapezoidNodes, const bool& leftPointUnshared) {
+    // create the new trapezoids
     Trapezoid upperTrapezoid(trapezoids[trapezoidToDelete].getTopSegment(), segment, leftPoint, rightPoint, newTrapezoidNodes[0]);
     Trapezoid lowerTrapezoid(segment, trapezoids[trapezoidToDelete].getBottomSegment(), leftPoint, rightPoint, newTrapezoidNodes[1]);
     Trapezoid leftTrapezoid(trapezoids[trapezoidToDelete].getTopSegment(), trapezoids[trapezoidToDelete].getBottomSegment(), trapezoids[trapezoidToDelete].getLeftPoint(), leftPoint, newTrapezoidNodes[2]);
     Trapezoid rightTrapezoid(trapezoids[trapezoidToDelete].getTopSegment(), trapezoids[trapezoidToDelete].getBottomSegment(), rightPoint, trapezoids[trapezoidToDelete].getRightPoint(), newTrapezoidNodes.back());
 
+    // if the left point of the segment is new
     if (leftPointUnshared) {
+        // update the neighbours of the left, the upper and the lower trapezoid
         leftTrapezoid.setUpperRightNeighbour(newTrapezoids[0]);
         leftTrapezoid.setLowerRightNeighbour(newTrapezoids[1]);
         leftTrapezoid.setUpperLeftNeighbour(trapezoids[trapezoidToDelete].getUpperLeftNeighbour());
@@ -269,7 +272,9 @@ void TrapezoidalMap::update(const size_t& trapezoidToDelete, const size_t& leftP
         if (leftTrapezoid.getLowerLeftNeighbour() != std::numeric_limits<size_t>::max())
             trapezoids[leftTrapezoid.getLowerLeftNeighbour()].setLowerRightNeighbour(newTrapezoids[2]);
 
+        // if the right point of the segment is not new
         if (newTrapezoidNodes.size() != 4) {
+            // update the right neighbours of the trapezoid whose segments do not have the same point
             if (getIndexedSegment(upperTrapezoid.getTopSegment()).second != getIndexedSegment(upperTrapezoid.getBottomSegment()).second) {
                 upperTrapezoid.setUpperRightNeighbour(trapezoids[trapezoidToDelete].getUpperRightNeighbour());
 
@@ -285,7 +290,9 @@ void TrapezoidalMap::update(const size_t& trapezoidToDelete, const size_t& leftP
             }
         }
 
+    // if the left point of the segment is not new
     } else {
+        // update the left neighbours of the trapezoid whose segments do not have the same point
         if (getIndexedSegment(upperTrapezoid.getTopSegment()).first != getIndexedSegment(upperTrapezoid.getBottomSegment()).first) {
             upperTrapezoid.setUpperLeftNeighbour(trapezoids[trapezoidToDelete].getUpperLeftNeighbour());
 
@@ -301,7 +308,9 @@ void TrapezoidalMap::update(const size_t& trapezoidToDelete, const size_t& leftP
         }
     }
 
+    // if the left point of the segment is not new or if the right point of the segment is new
     if (!leftPointUnshared || newTrapezoids.size() == 4) {
+        // update the neighbours of the right, the upper and the lower trapezoid
         rightTrapezoid.setUpperLeftNeighbour(newTrapezoids[0]);
         rightTrapezoid.setLowerLeftNeighbour(newTrapezoids[1]);
         rightTrapezoid.setUpperRightNeighbour(trapezoids[trapezoidToDelete].getUpperRightNeighbour());
@@ -316,6 +325,7 @@ void TrapezoidalMap::update(const size_t& trapezoidToDelete, const size_t& leftP
             trapezoids[rightTrapezoid.getLowerRightNeighbour()].setLowerLeftNeighbour(newTrapezoids.back());
     }
 
+    // store the trapezoids
     trapezoids[trapezoidToDelete] = upperTrapezoid;
 
     trapezoids.push_back(lowerTrapezoid);
